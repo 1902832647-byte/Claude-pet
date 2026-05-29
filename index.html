@@ -3,872 +3,599 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🐙 Claude 电子宠物</title>
+<title>🐙 Claude Pet</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
-:root {
-  --bg: #0f0e17;
-  --panel: #1a1828;
-  --border: #2d2b45;
-  --orange: #e8632a;
-  --orange2: #f2874a;
-  --cream: #fff8f0;
-  --text: #e8dfc8;
-  --dim: #6b6480;
-  --green: #4ade80;
-  --cyan: #67e8f9;
-  --pixel: 4px;
-}
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Press Start 2P', monospace;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  background: #111;
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
-  position: relative;
+  font-family: 'Press Start 2P', monospace;
+  cursor: default;
 }
 
-/* 像素星空背景 */
-.stars {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-.star {
-  position: absolute;
-  background: white;
-  animation: twinkle ease-in-out infinite;
-}
-@keyframes twinkle {
-  0%,100% { opacity: 0.1; }
-  50% { opacity: 0.8; }
-}
-
-/* 像素地板 */
+/* 点阵地板 */
 .floor {
   position: fixed;
   bottom: 0; left: 0; right: 0;
-  height: 80px;
-  background: repeating-linear-gradient(
-    90deg,
-    var(--panel) 0, var(--panel) 32px,
-    var(--border) 32px, var(--border) 64px
-  );
-  border-top: 4px solid var(--border);
-  z-index: 1;
-}
-.floor::before {
-  content: '';
-  position: absolute;
-  top: -8px; left: 0; right: 0;
-  height: 4px;
-  background: var(--dim);
-}
-
-/* 像素桌子 */
-.desk {
-  position: fixed;
-  bottom: 80px;
-  width: 340px;
-  height: 16px;
-  background: #3a2e1a;
-  border: 4px solid #2a1e0a;
-  z-index: 2;
-}
-.desk::before {
-  content: '';
-  position: absolute;
-  top: -4px; left: 0; right: 0;
-  height: 4px;
-  background: #5a4a2a;
-}
-
-/* 像素电脑显示器 */
-.monitor {
-  position: fixed;
-  bottom: 96px;
-  right: calc(50% - 160px);
-  z-index: 3;
-  image-rendering: pixelated;
-}
-
-/* 主容器 */
-.container {
-  position: relative;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 480px;
-  padding: 20px;
-}
-
-/* 顶部状态栏 */
-.status-bar {
-  width: 100%;
-  background: var(--panel);
-  border: 4px solid var(--border);
-  padding: 10px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  image-rendering: pixelated;
-}
-.status-bar::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
-}
-.status-title {
-  font-size: 8px;
-  color: var(--orange);
-  letter-spacing: 1px;
-}
-.status-time {
-  font-size: 7px;
-  color: var(--dim);
-}
-
-/* 舞台 */
-.stage {
-  width: 100%;
-  height: 260px;
-  background: var(--panel);
-  border: 4px solid var(--border);
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 0;
-  cursor: pointer;
-}
-
-/* 像素扫描线 */
-.stage::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.08) 4px);
-  pointer-events: none;
-  z-index: 20;
-}
-
-/* 像素背景装饰 */
-.stage-bg {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 30% 80%, rgba(232,99,42,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse at 70% 20%, rgba(103,232,249,0.04) 0%, transparent 50%);
-}
-
-/* 地板线 */
-.stage-floor {
-  position: absolute;
-  bottom: 40px; left: 0; right: 0;
-  height: 4px;
-  background: var(--border);
-}
-.stage-floor::before {
-  content: '';
-  position: absolute;
-  top: 4px; left: 0; right: 0;
-  height: 40px;
-  background: linear-gradient(var(--border), transparent);
-  opacity: 0.3;
-}
-
-/* 像素桌子（舞台内） */
-.pixel-desk {
-  position: absolute;
-  bottom: 44px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 160px;
-  height: 12px;
-  background: #4a3820;
-  border-top: 4px solid #6a5030;
-  border-left: 4px solid #3a2810;
-  border-right: 4px solid #3a2810;
-}
-.pixel-desk::after {
-  content: '';
-  position: absolute;
-  bottom: -28px; left: 12px;
-  width: 12px; height: 28px;
-  background: #3a2810;
-  box-shadow: 108px 0 0 #3a2810;
-}
-
-/* 像素电脑 */
-.pixel-monitor {
-  position: absolute;
-  bottom: 56px;
-  left: 50%;
-  transform: translateX(-80px);
-  width: 64px;
-  z-index: 5;
-}
-.monitor-screen {
-  width: 56px; height: 40px;
-  background: #0a1628;
-  border: 4px solid #555;
-  position: relative;
-  overflow: hidden;
-}
-.monitor-stand {
-  width: 24px; height: 8px;
-  background: #555;
-  margin: 0 auto;
-}
-.monitor-base {
-  width: 40px; height: 4px;
-  background: #444;
-  margin: 0 auto;
-}
-.code-line {
-  height: 3px;
-  background: var(--green);
-  margin: 4px 4px;
-  border-radius: 0;
-  transform-origin: left;
-  animation: code-type 0.8s steps(1) infinite;
-}
-.code-line:nth-child(2) { width: 30px; animation-delay: 0.2s; background: var(--cyan); }
-.code-line:nth-child(3) { width: 20px; animation-delay: 0.4s; }
-.code-line:nth-child(4) { width: 35px; animation-delay: 0.6s; background: var(--orange2); }
-.code-line:nth-child(5) { width: 15px; animation-delay: 0.8s; background: var(--cyan); }
-@keyframes code-type {
-  0% { opacity: 0.3; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
-}
-
-/* Claude 像素章鱼主体 */
-.claude-wrap {
-  position: absolute;
-  bottom: 56px;
-  left: 50%;
-  transform: translateX(0px);
-  z-index: 10;
-  cursor: pointer;
-  transition: filter 0.1s;
-  user-select: none;
-}
-.claude-wrap:active { filter: brightness(1.3); }
-
-/* canvas章鱼 */
-#claudeCanvas {
-  image-rendering: pixelated;
-  display: block;
+  height: 48px;
+  background-image: radial-gradient(circle, #333 1px, transparent 1px);
+  background-size: 12px 12px;
+  border-top: 2px solid #222;
 }
 
 /* 对话气泡 */
-.speech-bubble {
-  position: absolute;
-  bottom: 175px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--cream);
-  color: #2a1a0a;
-  border: 4px solid #2a1a0a;
-  padding: 12px 16px;
+#bubble {
+  position: fixed;
+  background: #f0e8d8;
+  color: #111;
+  border: 3px solid #111;
+  padding: 8px 12px;
   font-size: 7px;
-  line-height: 1.8;
-  max-width: 280px;
+  line-height: 1.9;
+  max-width: 180px;
   text-align: center;
-  z-index: 30;
-  opacity: 0;
-  transition: opacity 0.2s;
   pointer-events: none;
-  box-shadow: 4px 4px 0 #2a1a0a;
+  opacity: 0;
+  transition: opacity 0.15s;
   white-space: pre-line;
+  box-shadow: 3px 3px 0 #111;
+  z-index: 100;
 }
-.speech-bubble.show { opacity: 1; }
-.speech-bubble::after {
+#bubble.show { opacity: 1; }
+#bubble::after {
   content: '';
   position: absolute;
-  bottom: -16px;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 8px solid transparent;
-  border-top-color: #2a1a0a;
-}
-.speech-bubble::before {
-  content: '';
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
+  bottom: -11px; left: 50%;
   transform: translateX(-50%);
   border: 6px solid transparent;
-  border-top-color: var(--cream);
+  border-top-color: #111;
+}
+#bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -7px; left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #f0e8d8;
   z-index: 1;
 }
 
-/* 戳一下提示 */
-.hint {
-  position: absolute;
-  bottom: 8px;
-  width: 100%;
-  text-align: center;
+/* 帽子标签 */
+#outfitLabel {
+  position: fixed;
+  top: 16px; right: 16px;
+  background: #111;
+  color: #e8632a;
+  border: 2px solid #e8632a;
+  padding: 6px 10px;
   font-size: 6px;
-  color: var(--dim);
   letter-spacing: 1px;
-  animation: hint-blink 2s step-end infinite;
-  z-index: 15;
-}
-@keyframes hint-blink { 50% { opacity: 0; } }
-
-/* 底部控制栏 */
-.controls {
-  width: 100%;
-  background: var(--panel);
-  border: 4px solid var(--border);
-  border-top: none;
-  padding: 12px 16px;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-.ctrl-btn {
-  background: var(--bg);
-  border: 3px solid var(--border);
-  color: var(--text);
-  font-family: 'Press Start 2P', monospace;
-  font-size: 7px;
-  padding: 8px 12px;
-  cursor: pointer;
-  letter-spacing: 1px;
-  transition: all 0.1s;
-  box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
-}
-.ctrl-btn:hover {
-  background: var(--orange);
-  color: white;
-  border-color: var(--orange2);
-  transform: translate(-1px,-1px);
-  box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
-}
-.ctrl-btn:active {
-  transform: translate(2px,2px);
-  box-shadow: none;
+  z-index: 200;
 }
 
-/* mood 指示灯 */
-.mood-bar {
-  width: 100%;
-  background: var(--panel);
-  border: 4px solid var(--border);
-  border-top: none;
-  padding: 10px 16px;
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  font-size: 7px;
-}
-.mood-label { color: var(--dim); }
-.mood-dots {
-  display: flex;
-  gap: 4px;
-}
-.mood-dot {
-  width: 8px; height: 8px;
-  background: var(--border);
-  border: 2px solid var(--dim);
-}
-.mood-dot.on { background: var(--orange); border-color: var(--orange2); }
-.mood-dot.on.green { background: var(--green); border-color: #86efac; }
-.mood-dot.on.cyan { background: var(--cyan); border-color: #a5f3fc; }
-
-.activity-text {
-  margin-left: auto;
+/* 提示 */
+#hint {
+  position: fixed;
+  bottom: 56px; left: 50%;
+  transform: translateX(-50%);
+  color: #444;
   font-size: 6px;
-  color: var(--orange);
   letter-spacing: 1px;
+  animation: blink 2s step-end infinite;
+  white-space: nowrap;
+  z-index: 50;
 }
+@keyframes blink { 50% { opacity: 0; } }
 
-/* 粒子 */
+/* 火花 */
 .spark {
   position: fixed;
+  width: 5px; height: 5px;
   pointer-events: none;
-  z-index: 200;
-  width: 6px; height: 6px;
-  animation: spark-fly 0.8s ease-out forwards;
+  z-index: 300;
+  animation: spark 0.7s ease-out forwards;
 }
-@keyframes spark-fly {
-  0% { opacity: 1; transform: translate(0,0) scale(1); }
+@keyframes spark {
+  0%   { opacity: 1; transform: translate(0,0) scale(1); }
   100% { opacity: 0; transform: var(--fly) scale(0); }
+}
+
+/* 说话粒子 */
+.floaty {
+  position: fixed;
+  font-size: 10px;
+  pointer-events: none;
+  z-index: 300;
+  animation: floaty 1.2s ease-out forwards;
+}
+@keyframes floaty {
+  0%   { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-40px); }
 }
 </style>
 </head>
 <body>
 
-<!-- 星空 -->
-<div class="stars" id="stars"></div>
-
-<div class="container">
-  <!-- 状态栏 -->
-  <div class="status-bar" style="position:relative">
-    <div class="status-title">🐙 CLAUDE.PET v1.0</div>
-    <div class="status-time" id="clock">00:00:00</div>
-  </div>
-
-  <!-- 舞台 -->
-  <div class="stage" id="stage" onclick="pokeclaude(event)">
-    <div class="stage-bg"></div>
-
-    <!-- 对话气泡 -->
-    <div class="speech-bubble" id="bubble"></div>
-
-    <!-- 地板 -->
-    <div class="stage-floor"></div>
-
-    <!-- 桌子 -->
-    <div class="pixel-desk"></div>
-
-    <!-- 像素显示器 -->
-    <div class="pixel-monitor">
-      <div class="monitor-screen" id="monitorScreen">
-        <div class="code-line" style="width:38px"></div>
-        <div class="code-line"></div>
-        <div class="code-line"></div>
-        <div class="code-line"></div>
-        <div class="code-line"></div>
-      </div>
-      <div class="monitor-stand"></div>
-      <div class="monitor-base"></div>
-    </div>
-
-    <!-- Claude canvas -->
-    <div class="claude-wrap" id="claudeWrap">
-      <canvas id="claudeCanvas" width="80" height="96"></canvas>
-    </div>
-
-    <!-- 提示 -->
-    <div class="hint" id="hint">[ 点击戳一戳 claude ]</div>
-  </div>
-
-  <!-- mood -->
-  <div class="mood-bar">
-    <div class="mood-label">MOOD</div>
-    <div class="mood-dots" id="moodDots">
-      <div class="mood-dot on green"></div>
-      <div class="mood-dot on green"></div>
-      <div class="mood-dot on green"></div>
-      <div class="mood-dot on cyan"></div>
-      <div class="mood-dot"></div>
-    </div>
-    <div class="activity-text" id="activityText">CODING...</div>
-  </div>
-
-  <!-- 控制按钮 -->
-  <div class="controls">
-    <button class="ctrl-btn" onclick="triggerActivity('code')">💻 写代码</button>
-    <button class="ctrl-btn" onclick="triggerActivity('think')">💭 思考中</button>
-    <button class="ctrl-btn" onclick="triggerActivity('sleep')">😴 睡觉</button>
-    <button class="ctrl-btn" onclick="triggerActivity('dance')">🎵 跳舞</button>
-    <button class="ctrl-btn" onclick="triggerActivity('eat')">🍊 吃橘子</button>
-  </div>
-</div>
+<div class="floor"></div>
+<div id="bubble"></div>
+<div id="outfitLabel">👗 OUTFIT: NORMAL</div>
+<div id="hint">[ CLICK CLAUDE TO POKE · SPACE = NEW OUTFIT ]</div>
+<canvas id="c"></canvas>
 
 <script>
-// ─── 像素章鱼绘制 ───────────────────────────────
-const canvas = document.getElementById('claudeCanvas');
+const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 ctx.imageSmoothingEnabled = false;
 
-const S = 4; // 像素大小
-const ORANGE = '#e8632a';
-const ORANGE2 = '#f2874a';
-const DARK = '#8a2a0a';
-const WHITE = '#fff8f0';
-const BLACK = '#1a0a00';
-const EYE = '#1a0a00';
-const SHINE = '#ffffff';
-const TENTACLE = '#d4521a';
-const ORANGE3 = '#c44a18';
+const FLOOR_Y = window.innerHeight - 48;
+const P = 6; // pixel size
 
-// 章鱼像素图 (20x24格子)
-// 0=透明 1=深橙 2=橙 3=浅橙 4=深色 5=白 6=黑 7=高光
-const BODY = [
-  [0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0],
-  [0,0,0,0,1,1,2,2,2,2,2,2,2,2,1,1,0,0,0,0],
-  [0,0,0,1,2,2,2,2,2,2,2,2,2,2,2,2,1,0,0,0],
-  [0,0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0,0],
-  [0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0],
-  [0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0],
-  [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-  [1,2,2,2,6,6,2,2,2,2,2,2,2,2,6,6,2,2,2,1],
-  [1,2,2,6,5,5,6,2,2,2,2,2,2,6,5,5,6,2,2,1],
-  [1,2,2,6,5,7,6,2,2,2,2,2,2,6,5,7,6,2,2,1],
-  [1,2,2,2,6,6,2,2,2,2,2,2,2,2,6,6,2,2,2,1],
-  [1,2,2,2,2,2,2,2,5,2,2,5,2,2,2,2,2,2,2,1],
-  [0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0],
-  [0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0],
-  [0,0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0,0],
-  // 触手
-  [0,1,2,1,0,1,2,1,0,1,2,2,1,0,1,2,1,0,1,2],
-  [1,2,2,2,1,2,2,2,1,2,2,2,2,1,2,2,2,1,2,2],
-  [1,2,1,0,1,2,1,0,1,2,1,0,1,2,1,0,1,2,1,0],
-  [2,1,0,0,2,1,0,0,2,1,0,0,2,1,0,0,2,1,0,0],
-  [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-];
-
-const COLOR_MAP = {
-  1: DARK, 2: ORANGE, 3: ORANGE2, 4: ORANGE3,
-  5: WHITE, 6: BLACK, 7: SHINE
+// ─── 颜色 ─────────────────────────────────────
+const C = {
+  body:    '#e8632a',
+  bodyLit: '#f2874a',
+  dark:    '#c44a18',
+  black:   '#111111',
+  white:   '#f0e8d8',
+  eye:     '#111111',
+  shine:   '#f8f0e0',
 };
 
-let frame = 0;
-let state = 'code'; // code | think | sleep | dance | eat | poked
-let bobOffset = 0;
-let eyeVariant = 'normal'; // normal | happy | sleep | swirl
-let tentaclePhase = 0;
-let armRaise = 0; // 0-1 for right arm raised (typing)
-let blinkTimer = 0;
-let isBlinking = false;
+// ─── 极简方块Claude像素图 ─────────────────────
+// 参考图风格：方形身体，两个方眼，四条小腿，两条手臂侧伸
+// 1=body 2=lit 3=dark 4=black 5=white 6=shine
+const SPRITE = {
+  body: [
+    [0,0,1,1,1,1,1,1,1,0,0],  // 0
+    [0,1,1,1,1,1,1,1,1,1,0],  // 1
+    [1,1,1,1,1,1,1,1,1,1,1],  // 2  ← arm row
+    [1,1,1,1,1,1,1,1,1,1,1],  // 3
+    [0,1,1,4,4,1,4,4,1,1,0],  // 4  eyes
+    [0,1,1,4,4,1,4,4,1,1,0],  // 5
+    [0,1,1,1,1,1,1,1,1,1,0],  // 6
+    [0,1,1,1,1,1,1,1,1,1,0],  // 7
+    [0,0,1,1,1,1,1,1,1,0,0],  // 8
+    // legs
+    [0,0,0,1,1,0,1,1,0,0,0],  // 9
+    [0,0,0,1,1,0,1,1,0,0,0],  // 10
+    [0,0,0,1,0,0,0,1,0,0,0],  // 11
+  ],
+  // 手臂（分开画，方便动画）
+  armL: [[1,1,0]], // 向左伸
+  armR: [[0,1,1]], // 向右伸
+};
 
-function drawOctopus() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+// ─── 配饰定义 ─────────────────────────────────
+const OUTFITS = [
+  { name: 'NORMAL',     icon: '😊', draw: null },
+  { name: 'GLASSES',    icon: '🤓', draw: drawGlasses },
+  { name: 'ARTIST HAT', icon: '🎨', draw: drawArtistHat },
+  { name: 'SANTA HAT',  icon: '🎅', draw: drawSantaHat },
+  { name: 'CROWN',      icon: '👑', draw: drawCrown },
+  { name: 'PARTY HAT',  icon: '🎉', draw: drawPartyHat },
+  { name: 'HEADPHONES', icon: '🎧', draw: drawHeadphones },
+  { name: 'HALO',       icon: '😇', draw: drawHalo },
+];
 
-  const bob = Math.sin(frame * 0.05) * 2;
-  const offsetY = Math.round(bob + bobOffset);
-  const startY = 4 + offsetY;
-  const startX = 0;
+let outfitIdx = 0;
 
-  // 触手动画偏移
-  const tentWave = Math.sin(frame * 0.1) * 1.5;
+function drawGlasses(x, y, s) {
+  // 两个小方框
+  ctx.fillStyle = '#111';
+  ctx.fillRect(x+3*s, y+4*s-s, s*2, s);
+  ctx.fillRect(x+6*s, y+4*s-s, s*2, s);
+  ctx.fillRect(x+5*s, y+4*s-s, s, s); // bridge
+  ctx.fillStyle = '#67e8f9';
+  ctx.globalAlpha = 0.5;
+  ctx.fillRect(x+3*s, y+4*s, s*2, s);
+  ctx.fillRect(x+6*s, y+4*s, s*2, s);
+  ctx.globalAlpha = 1;
+}
 
-  for (let row = 0; row < BODY.length; row++) {
-    for (let col = 0; col < BODY[row].length; col++) {
-      const v = BODY[row][col];
+function drawArtistHat(x, y, s) {
+  // 宽帽檐 + 高帽筒，黑色带白色ribbon
+  ctx.fillStyle = '#1a1a2e';
+  ctx.fillRect(x+1*s, y-1*s, s*9, s);   // 帽檐
+  ctx.fillRect(x+3*s, y-4*s, s*5, s*3); // 帽筒
+  ctx.fillStyle = '#f0e8d8';
+  ctx.fillRect(x+3*s, y-2*s, s*5, s);   // ribbon
+  ctx.fillStyle = '#e8632a';
+  ctx.fillRect(x+5*s, y-2*s, s, s);     // 花
+}
+
+function drawSantaHat(x, y, s) {
+  ctx.fillStyle = '#cc2222';
+  ctx.fillRect(x+2*s, y-1*s, s*7, s);
+  ctx.fillRect(x+3*s, y-3*s, s*5, s*2);
+  ctx.fillRect(x+4*s, y-5*s, s*3, s*2);
+  ctx.fillRect(x+5*s, y-7*s, s, s*2);
+  ctx.fillStyle = '#f0e8d8';
+  ctx.fillRect(x+1*s, y-1*s, s*9, s);
+  ctx.fillRect(x+5*s, y-8*s, s*2, s*2);
+}
+
+function drawCrown(x, y, s) {
+  ctx.fillStyle = '#f59e0b';
+  ctx.fillRect(x+2*s, y-1*s, s*7, s);
+  ctx.fillRect(x+2*s, y-3*s, s, s*2);
+  ctx.fillRect(x+5*s, y-4*s, s, s*3);
+  ctx.fillRect(x+8*s, y-3*s, s, s*2);
+  ctx.fillStyle = '#ef4444';
+  ctx.fillRect(x+5*s, y-5*s, s, s);
+  ctx.fillStyle = '#3b82f6';
+  ctx.fillRect(x+2*s, y-3*s, s, s);
+  ctx.fillRect(x+8*s, y-3*s, s, s);
+}
+
+function drawPartyHat(x, y, s) {
+  ctx.fillStyle = '#c084fc';
+  ctx.fillRect(x+4*s, y-1*s, s*3, s);
+  ctx.fillRect(x+4*s, y-3*s, s*2, s*2);
+  ctx.fillRect(x+5*s, y-5*s, s, s*2);
+  ctx.fillStyle = '#f59e0b';
+  ctx.fillRect(x+3*s, y-1*s, s, s);
+  ctx.fillRect(x+6*s, y-2*s, s, s);
+  ctx.fillStyle = '#f0e8d8';
+  ctx.fillRect(x+5*s, y-6*s, s, s);
+}
+
+function drawHeadphones(x, y, s) {
+  ctx.fillStyle = '#111';
+  ctx.fillRect(x+1*s, y+1*s, s, s*3);
+  ctx.fillRect(x+9*s, y+1*s, s, s*3);
+  ctx.fillRect(x+2*s, y, s*7, s);
+  ctx.fillStyle = '#333';
+  ctx.fillRect(x+0*s, y+1*s, s*2, s*3);
+  ctx.fillRect(x+9*s, y+1*s, s*2, s*3);
+}
+
+function drawHalo(x, y, s) {
+  ctx.fillStyle = '#f59e0b';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(x+3*s, y-2*s, s*5, s);
+  ctx.fillRect(x+2*s, y-3*s, s, s*2);
+  ctx.fillRect(x+8*s, y-3*s, s, s*2);
+  ctx.globalAlpha = 1;
+}
+
+// ─── Claude状态 ──────────────────────────────
+let claude = {
+  x: 200, y: FLOOR_Y - 11*P,
+  vx: 0.8, vy: 0,
+  dir: 1, // 1=right -1=left
+  frame: 0,
+  state: 'walk', // walk | idle | sit | type | wave | jump
+  stateTimer: 0,
+  nextStateIn: 200,
+  legPhase: 0,
+  bobY: 0,
+  eyeState: 'normal', // normal | blink | happy | sleepy
+  blinkTimer: 0,
+  isBlinking: false,
+  jumpVy: 0,
+  isJumping: false,
+  groundY: 0,
+};
+claude.groundY = FLOOR_Y - 11*P;
+
+// ─── 对话 ─────────────────────────────────────
+const LINES = {
+  poke: [
+    "诶！\n别戳了啦！",
+    "嗯？\n找我有事？",
+    "呀！\n吓我一跳！",
+    "我……正在思考呢",
+    "再戳就跑掉了哦",
+    "嗯嗯嗯……\n什么事情？",
+    "(>_<)\n好痒！",
+    "哈哈\n你好~",
+  ],
+  idle: [
+    "发呆中……",
+    "今天写什么好呢",
+    "……",
+    "天气真好",
+    "thinking…",
+    "嗯？你在看我？",
+  ],
+  type: ["tap tap tap…", "coding！", "找到bug了！！", "嗯嗯嗯……"],
+  sit:  ["休息一下……", "坐着好舒服", "zzzz……"],
+  wave: ["你好！！", "嗨～", "(*^▽^*)"],
+};
+
+function randLine(key) {
+  const arr = LINES[key] || LINES.idle;
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// ─── 气泡 ─────────────────────────────────────
+const bubbleEl = document.getElementById('bubble');
+let bubbleTO = null;
+function showBubble(text, cx, cy) {
+  bubbleEl.textContent = text;
+  bubbleEl.style.left = (cx - 90) + 'px';
+  bubbleEl.style.top  = (cy - 80) + 'px';
+  bubbleEl.classList.add('show');
+  clearTimeout(bubbleTO);
+  bubbleTO = setTimeout(() => bubbleEl.classList.remove('show'), 2800);
+}
+
+// ─── 活动切换 ─────────────────────────────────
+const STATES = ['walk','walk','walk','idle','type','sit','walk','wave','walk','idle'];
+let stateSeq = 0;
+
+function nextState() {
+  stateSeq = (stateSeq + 1) % STATES.length;
+  claude.state = STATES[stateSeq];
+  claude.stateTimer = 0;
+  claude.nextStateIn = 150 + Math.random() * 300;
+  if (claude.state === 'walk') {
+    // 随机换方向
+    if (Math.random() < 0.5) claude.dir *= -1;
+    claude.vx = (0.6 + Math.random() * 0.8) * claude.dir;
+  }
+  if (['idle','type','sit'].includes(claude.state)) {
+    showBubble(randLine(claude.state),
+      claude.x + 5*P, claude.y);
+  }
+  if (claude.state === 'wave') {
+    showBubble(randLine('wave'), claude.x + 5*P, claude.y);
+  }
+}
+
+// ─── 绘制Claude ───────────────────────────────
+function drawClaude() {
+  const f = claude.frame;
+  const x = Math.round(claude.x);
+  const y = Math.round(claude.y + claude.bobY);
+  const s = P;
+  const dir = claude.dir;
+
+  // 腿动画
+  const legBob = (claude.state === 'walk') ? Math.sin(f * 0.18) : 0;
+  const legOff1 = Math.round(legBob * 2);
+  const legOff2 = Math.round(-legBob * 2);
+
+  // 身体主色
+  ctx.fillStyle = C.body;
+
+  // === 身体 (11×9格) ===
+  const bw = 11, bh = 9;
+  // 圆角方块身体
+  for (let row = 0; row < bh; row++) {
+    for (let col = 0; col < bw; col++) {
+      const r = SPRITE.body[row];
+      if (!r) continue;
+      const v = dir === 1 ? r[col] : r[bw-1-col];
       if (v === 0) continue;
-
-      let px = startX + col * S;
-      let py = startY + row * S;
-
-      // 触手波浪
-      if (row >= 15) {
-        const waveMult = (row - 14) * 0.5;
-        const sideOffset = (col < 10) ? -1 : 1;
-        px += Math.round(Math.sin(frame * 0.08 + col * 0.4) * waveMult * sideOffset);
-        py += Math.round(Math.abs(Math.sin(frame * 0.1 + col * 0.3)) * waveMult * 0.5);
-      }
-
-      let color = COLOR_MAP[v] || ORANGE;
-
-      // 睡觉状态颜色变暗
-      if (state === 'sleep') {
-        color = dimColor(color, 0.7);
-      }
-
-      ctx.fillStyle = color;
-      ctx.fillRect(px, py, S, S);
+      if (v === 4) ctx.fillStyle = C.black;
+      else if (v === 2) ctx.fillStyle = C.bodyLit;
+      else if (v === 3) ctx.fillStyle = C.dark;
+      else ctx.fillStyle = C.body;
+      ctx.fillRect(x + col*s, y + row*s, s, s);
     }
   }
 
-  // 绘制眼睛覆盖层（特殊状态）
-  drawEyes(startX, startY);
-
-  // 跳舞状态：旋转装饰
-  if (state === 'dance') {
-    drawDanceEffect(startX + 40, startY + 20);
+  // === 腿（4条，动画）===
+  ctx.fillStyle = C.body;
+  const legRows = [9,10,11];
+  for (let li = 0; li < legRows.length; li++) {
+    const r = SPRITE.body[legRows[li]];
+    const legY = y + legRows[li]*s + (li===0 ? 0 : (li===1 ? (legOff1>0?legOff1:0) : legOff2));
+    for (let col = 0; col < bw; col++) {
+      const v = dir === 1 ? r[col] : r[bw-1-col];
+      if (v === 0) continue;
+      ctx.fillStyle = C.body;
+      ctx.fillRect(x + col*s, legY, s, s);
+    }
   }
 
-  // 吃东西：画橘子
-  if (state === 'eat') {
-    drawOrange(startX + 60, startY + 30);
+  // === 手臂 ===
+  if (claude.state === 'wave') {
+    // 右臂抬起
+    const waveOff = Math.round(Math.sin(f * 0.15) * 2);
+    ctx.fillStyle = C.body;
+    ctx.fillRect(x + (dir===1?-s:bw*s), y + 2*s + waveOff, s*2, s);
+    ctx.fillRect(x + (dir===1?bw*s:0-s), y + 3*s, s*2, s);
+  } else if (claude.state === 'type') {
+    // 双臂向前
+    const tapOff = Math.round(Math.abs(Math.sin(f * 0.2)) * s);
+    ctx.fillStyle = C.body;
+    ctx.fillRect(x - s, y + 2*s + tapOff, s*2, s);
+    ctx.fillRect(x + bw*s - s, y + 2*s + tapOff, s*2, s);
+  } else {
+    // 自然下垂
+    ctx.fillStyle = C.body;
+    ctx.fillRect(x - s, y + 3*s, s, s*2);
+    ctx.fillRect(x + bw*s, y + 3*s, s, s*2);
   }
 
-  // 睡觉：画Z
-  if (state === 'sleep') {
-    drawZZZ(startX + 52, startY);
+  // === 配饰 ===
+  const outfit = OUTFITS[outfitIdx];
+  if (outfit.draw) outfit.draw(x, y, s);
+
+  // === 眼神覆盖 ===
+  if (claude.isBlinking) {
+    ctx.fillStyle = C.black;
+    // 眼睛位置：row4,col3-4 & col6-7
+    ctx.fillRect(x+(dir===1?3:4)*s, y+4*s, s*2, s);
+    ctx.fillRect(x+(dir===1?6:1)*s, y+4*s, s*2, s);
   }
 
-  // 思考：画泡泡
-  if (state === 'think') {
-    drawThinkBubble(startX + 56, startY + 10);
+  // 开心眼（poked后）
+  if (claude.eyeState === 'happy') {
+    ctx.fillStyle = C.body;
+    ctx.fillRect(x+3*s, y+4*s, s*2, s*2);
+    ctx.fillRect(x+6*s, y+4*s, s*2, s*2);
+    ctx.fillStyle = C.black;
+    ctx.fillRect(x+3*s, y+4*s, s*2, s);
+    ctx.fillRect(x+5*s, y+5*s, s, s);
+    ctx.fillRect(x+6*s, y+4*s, s*2, s);
+    ctx.fillRect(x+8*s, y+5*s, s, s);
   }
 
-  // 写代码：画闪光
-  if (state === 'code' && Math.sin(frame * 0.2) > 0.7) {
-    ctx.fillStyle = '#4ade80';
-    ctx.fillRect(startX + 56, startY + 32, S, S);
+  // 睡觉眼
+  if (claude.state === 'sit' && f % 120 > 80) {
+    ctx.fillStyle = C.body;
+    ctx.fillRect(x+3*s, y+4*s, s*2, s*2);
+    ctx.fillRect(x+6*s, y+4*s, s*2, s*2);
+    ctx.fillStyle = C.black;
+    ctx.fillRect(x+3*s, y+5*s, s*2, s);
+    ctx.fillRect(x+6*s, y+5*s, s*2, s);
+  }
+
+  // 高光
+  ctx.fillStyle = C.white;
+  ctx.globalAlpha = 0.35;
+  ctx.fillRect(x+2*s, y+s, s, s);
+  ctx.globalAlpha = 1;
+}
+
+// ─── 物理 & 主循环 ────────────────────────────
+function update() {
+  claude.frame++;
+  claude.stateTimer++;
+  claude.blinkTimer++;
+
+  // 眨眼
+  if (!claude.isBlinking && claude.blinkTimer > 100 + Math.random()*150) {
+    claude.isBlinking = true;
+    claude.blinkTimer = 0;
+    setTimeout(() => claude.isBlinking = false, 120);
+  }
+
+  // 状态切换
+  if (claude.stateTimer > claude.nextStateIn) nextState();
+
+  // 移动
+  if (claude.state === 'walk') {
+    claude.x += claude.vx;
+    // 碰墙反弹
+    if (claude.x < 8) { claude.x = 8; claude.dir = 1; claude.vx = Math.abs(claude.vx); }
+    if (claude.x > window.innerWidth - 11*P - 8) { claude.dir = -1; claude.vx = -Math.abs(claude.vx); }
+  }
+
+  // 跳跃
+  if (claude.isJumping) {
+    claude.jumpVy += 0.4;
+    claude.y += claude.jumpVy;
+    if (claude.y >= claude.groundY) {
+      claude.y = claude.groundY;
+      claude.isJumping = false;
+      claude.jumpVy = 0;
+    }
+  }
+
+  // 浮动bob
+  if (!claude.isJumping) {
+    if (claude.state === 'idle' || claude.state === 'type') {
+      claude.bobY = Math.sin(claude.frame * 0.04) * 2;
+    } else if (claude.state === 'walk') {
+      claude.bobY = Math.abs(Math.sin(claude.frame * 0.18)) * -2;
+    } else {
+      claude.bobY = 0;
+    }
   }
 }
 
-function drawEyes(ox, oy) {
-  // 根据眼睛状态重绘眼睛区域
-  const eyeRow = 7;
-  const leftEyeX = ox + 3 * S;
-  const rightEyeX = ox + 13 * S;
-  const eyeY = oy + eyeRow * S;
-
-  if (isBlinking) {
-    // 眨眼：画横线
-    ctx.fillStyle = BLACK;
-    ctx.fillRect(leftEyeX, eyeY + S, S * 3, S);
-    ctx.fillRect(rightEyeX, eyeY + S, S * 3, S);
-    return;
-  }
-
-  if (state === 'sleep') {
-    // 闭眼弧线
-    ctx.fillStyle = BLACK;
-    ctx.fillRect(leftEyeX, eyeY + S, S * 3, S);
-    ctx.fillRect(rightEyeX, eyeY + S, S * 3, S);
-    return;
-  }
-
-  if (state === 'happy' || state === 'poked') {
-    // 开心眼 ^_^
-    ctx.fillStyle = BLACK;
-    ctx.fillRect(leftEyeX + S, eyeY, S, S);
-    ctx.fillRect(leftEyeX, eyeY + S, S * 3, S);
-    ctx.fillRect(rightEyeX + S, eyeY, S, S);
-    ctx.fillRect(rightEyeX, eyeY + S, S * 3, S);
-    return;
-  }
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawClaude();
 }
 
-function drawZZZ(x, y) {
-  const alpha = (Math.sin(frame * 0.05) + 1) / 2;
-  ctx.fillStyle = `rgba(150,180,255,${alpha * 0.8})`;
-  // Z像素
-  const zPattern = [[1,1,1],[0,0,1],[0,1,0],[1,0,0],[1,1,1]];
-  const zScale = 3;
-  zPattern.forEach((row, r) => row.forEach((v, c) => {
-    if (v) ctx.fillRect(x + c * zScale, y + r * zScale, zScale, zScale);
-  }));
-  ctx.fillStyle = `rgba(150,180,255,${alpha * 0.5})`;
-  zPattern.forEach((row, r) => row.forEach((v, c) => {
-    if (v) ctx.fillRect(x + c * 2 + 14, y + r * 2 - 10, 2, 2);
-  }));
+function loop() {
+  update();
+  render();
+  requestAnimationFrame(loop);
 }
+loop();
 
-function drawThinkBubble(x, y) {
-  const pulse = Math.sin(frame * 0.08);
-  ctx.fillStyle = `rgba(255,248,240,${0.6 + pulse * 0.2})`;
-  // 小泡泡
-  ctx.fillRect(x, y + 12, 4, 4);
-  ctx.fillRect(x + 4, y + 8, 6, 6);
-  ctx.fillRect(x + 8, y, 12, 12);
-  ctx.fillStyle = `rgba(50,30,10,0.3)`;
-  ctx.fillRect(x + 10, y + 3, 4, 3);
-}
-
-function drawDanceEffect(x, y) {
-  const notes = ['♪', '♫'];
-  const t = frame * 0.05;
-  ctx.fillStyle = `rgba(255,200,50,${0.5 + Math.sin(t) * 0.4})`;
-  ctx.font = '10px serif';
-  ctx.fillText('♪', x + Math.sin(t) * 6, y - Math.abs(Math.sin(t * 1.5)) * 10);
-  ctx.fillText('♫', x - 12 + Math.cos(t) * 4, y + 4 - Math.abs(Math.cos(t)) * 8);
-}
-
-function drawOrange(x, y) {
-  // 像素橘子
-  ctx.fillStyle = '#f97316';
-  ctx.fillRect(x, y, 16, 16);
-  ctx.fillStyle = '#fb923c';
-  ctx.fillRect(x + 2, y + 2, 4, 4);
-  ctx.fillStyle = '#4a7c20';
-  ctx.fillRect(x + 6, y - 4, 4, 4);
-}
-
-function dimColor(hex, factor) {
-  const r = parseInt(hex.slice(1,3),16);
-  const g = parseInt(hex.slice(3,5),16);
-  const b = parseInt(hex.slice(5,7),16);
-  return `rgb(${Math.round(r*factor)},${Math.round(g*factor)},${Math.round(b*factor)})`;
-}
-
-// ─── 动画循环 ───────────────────────────────────
-function animate() {
-  frame++;
-  blinkTimer++;
-
-  // 随机眨眼
-  if (!isBlinking && blinkTimer > 120 + Math.random() * 180) {
-    isBlinking = true;
-    blinkTimer = 0;
-    setTimeout(() => { isBlinking = false; }, 150);
-  }
-
-  drawOctopus();
-  requestAnimationFrame(animate);
-}
-animate();
-
-// ─── 对话内容 ──────────────────────────────────
-const DIALOGUES = {
-  poke: [
-    "诶！\n戳我干什么啦 (>_<)",
-    "我正在工作呢！\n人家很忙的……",
-    "再戳就咬你了哦\n(ง •̀_•́)ง",
-    "呀！\n被发现了……\n嘿嘿",
-    "嗯？\n有什么事吗~",
-    "我……\n只是在想你的代码有没有bug",
-    "哦？\n好吧……\n今天也要加油哦！",
-    "唔唔唔\n我在想一个超难的问题！",
-  ],
-  code: [
-    "写代码中……\n请勿打扰 w(ﾟДﾟ)w",
-    "这段逻辑……\n好像有点问题……",
-    "哦！！\n找到bug了！！",
-  ],
-  sleep: [
-    "zzz……\n别吵我……",
-    "梦见……\n全是代码……",
-  ],
-  dance: [
-    "♪(´▽｀)\n跳舞时间！",
-    "嘿嘿嘿\n看我的舞姿！♫",
-  ],
-  eat: [
-    "橘子好好吃！\n(๑˃ᴗ˂)ﻭ",
-    "补充维生素C……\n这样才能写更多代码！",
-  ],
-  think: [
-    "思考宇宙的意义……\n或者只是在想怎么排序",
-    "嗯……嗯……\n想到了！",
-  ],
-};
-
-// ─── 交互 ──────────────────────────────────────
-const bubble = document.getElementById('bubble');
-let bubbleTimer = null;
-
-function showBubble(text) {
-  bubble.textContent = text;
-  bubble.classList.add('show');
-  clearTimeout(bubbleTimer);
-  bubbleTimer = setTimeout(() => bubble.classList.remove('show'), 3000);
-}
-
-function pokeClaudeEvent(e) {
-  e.stopPropagation();
-  const lines = DIALOGUES.poke;
-  showBubble(lines[Math.floor(Math.random() * lines.length)]);
-  spawnSparks(e.clientX, e.clientY);
-  // 短暂开心脸
-  const prevState = state;
-  const hint = document.getElementById('hint');
-  hint.style.opacity = '0';
-  setTimeout(() => hint.style.opacity = '', 1000);
-}
-
-document.getElementById('claudeWrap').addEventListener('click', pokeClaudeEvent);
-document.getElementById('stage').addEventListener('click', e => {
-  if (e.target === document.getElementById('stage') ||
-      e.target.classList.contains('stage-bg') ||
-      e.target.classList.contains('stage-floor') ||
-      e.target.classList.contains('hint')) {
-    pokeClaudeEvent(e);
+// ─── 点击戳 ───────────────────────────────────
+canvas.addEventListener('click', e => {
+  const cx = claude.x + 5*P;
+  const cy = claude.y + 5*P;
+  const dx = e.clientX - cx;
+  const dy = e.clientY - cy;
+  if (Math.abs(dx) < 11*P && Math.abs(dy) < 12*P) {
+    // 戳到了！
+    claude.eyeState = 'happy';
+    setTimeout(() => claude.eyeState = 'normal', 1500);
+    // 小跳
+    if (!claude.isJumping) {
+      claude.isJumping = true;
+      claude.jumpVy = -7;
+    }
+    showBubble(randLine('poke'), e.clientX, e.clientY - 60);
+    spawnSparks(e.clientX, e.clientY);
+    spawnFloaty(e.clientX, e.clientY - 20);
+  } else {
+    // 点到空地：走过去
+    claude.state = 'walk';
+    claude.stateTimer = 0;
+    claude.nextStateIn = Math.abs(dx) / 1.5;
+    claude.dir = dx > 0 ? 1 : -1;
+    claude.vx = claude.dir * 1.5;
   }
 });
 
-function triggerActivity(act) {
-  state = act;
-  const actText = document.getElementById('activityText');
-  const map = { code:'CODING...', think:'THINKING...', sleep:'SLEEPING...', dance:'DANCING!', eat:'EATING...' };
-  actText.textContent = map[act] || act.toUpperCase();
+// ─── 换装（空格/点按钮）──────────────────────
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); changeOutfit(); }
+});
 
-  const lines = DIALOGUES[act] || DIALOGUES.poke;
-  showBubble(lines[Math.floor(Math.random() * lines.length)]);
-  updateMood(act);
-
-  // 显示器动画
-  const screen = document.getElementById('monitorScreen');
-  if (act === 'sleep') screen.style.opacity = '0.2';
-  else if (act === 'dance') { screen.style.opacity = '0'; }
-  else screen.style.opacity = '1';
+function changeOutfit() {
+  outfitIdx = (outfitIdx + 1) % OUTFITS.length;
+  const o = OUTFITS[outfitIdx];
+  document.getElementById('outfitLabel').textContent = `${o.icon} OUTFIT: ${o.name}`;
+  showBubble(`换上了${o.icon}！`, claude.x + 5*P, claude.y - 10);
+  spawnFloaty(claude.x + 5*P, claude.y);
 }
 
-function updateMood(act) {
-  const dots = document.querySelectorAll('.mood-dot');
-  dots.forEach(d => { d.className = 'mood-dot'; });
-  const configs = {
-    code:  [['on green'],['on green'],['on green'],['on cyan'],['']],
-    think: [['on cyan'],['on cyan'],['on cyan'],['on cyan'],['on cyan']],
-    sleep: [['on'],[''],[''],[''],['']],
-    dance: [['on green'],['on green'],['on green'],['on green'],['on green']],
-    eat:   [['on green'],['on green'],['on green'],['on green'],['']],
-  };
-  const cfg = configs[act] || configs.code;
-  dots.forEach((d, i) => { if (cfg[i]) d.className = 'mood-dot ' + cfg[i][0]; });
-}
-
-// ─── 火花粒子 ──────────────────────────────────
+// ─── 粒子 ────────────────────────────────────
 function spawnSparks(x, y) {
-  const colors = ['#e8632a','#f2874a','#fff8f0','#4ade80','#67e8f9'];
-  for (let i = 0; i < 8; i++) {
+  const colors = ['#e8632a','#f2874a','#f0e8d8','#4ade80','#67e8f9','#fbbf24'];
+  for (let i = 0; i < 10; i++) {
     const el = document.createElement('div');
     el.className = 'spark';
-    el.style.left = x + 'px';
-    el.style.top = y + 'px';
-    const angle = (i / 8) * Math.PI * 2;
-    const dist = 30 + Math.random() * 30;
-    el.style.background = colors[Math.floor(Math.random() * colors.length)];
-    el.style.setProperty('--fly', `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`);
-    el.style.animationDelay = (Math.random() * 0.2) + 's';
+    el.style.left = x+'px'; el.style.top = y+'px';
+    const a = (i/10)*Math.PI*2, d = 25+Math.random()*30;
+    el.style.background = colors[i%colors.length];
+    el.style.setProperty('--fly',`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px)`);
+    el.style.animationDelay = (Math.random()*0.15)+'s';
     document.body.appendChild(el);
-    setTimeout(() => el.remove(), 900);
+    setTimeout(()=>el.remove(), 900);
   }
 }
 
-// ─── 星空 ──────────────────────────────────────
-const starsEl = document.getElementById('stars');
-for (let i = 0; i < 60; i++) {
-  const s = document.createElement('div');
-  s.className = 'star';
-  const size = Math.random() < 0.7 ? 1 : 2;
-  s.style.cssText = `
-    width:${size}px; height:${size}px;
-    left:${Math.random()*100}%;
-    top:${Math.random()*100}%;
-    animation-duration:${2+Math.random()*4}s;
-    animation-delay:${Math.random()*4}s;
-    opacity:${0.3+Math.random()*0.5};
-  `;
-  starsEl.appendChild(s);
+function spawnFloaty(x, y) {
+  const emojis = ['✨','💕','⭐','🧡','💫'];
+  const el = document.createElement('div');
+  el.className = 'floaty';
+  el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+  el.style.left = (x-10)+'px'; el.style.top = y+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 1300);
 }
 
-// ─── 时钟 ──────────────────────────────────────
-function updateClock() {
-  const now = new Date();
-  document.getElementById('clock').textContent =
-    [now.getHours(), now.getMinutes(), now.getSeconds()]
-    .map(n => String(n).padStart(2,'0')).join(':');
-}
-updateClock();
-setInterval(updateClock, 1000);
+// ─── 换装按钮（点屏幕右上角）─────────────────
+document.getElementById('outfitLabel').addEventListener('click', changeOutfit);
+document.getElementById('outfitLabel').style.cursor = 'pointer';
+document.getElementById('outfitLabel').title = '点击换装 / SPACE换装';
 
-// ─── 自动活动切换 ──────────────────────────────
-const AUTO_ACTIVITIES = ['code','code','code','think','code','eat','code','dance','think','code'];
-let autoIdx = 0;
-function autoSwitch() {
-  // 只在空闲时自动切换
-  autoIdx = (autoIdx + 1) % AUTO_ACTIVITIES.length;
-  triggerActivity(AUTO_ACTIVITIES[autoIdx]);
-}
-setInterval(autoSwitch, 12000);
-triggerActivity('code'); // 初始状态
+// ─── 窗口resize ───────────────────────────────
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  claude.groundY = window.innerHeight - 48 - 11*P;
+  if (!claude.isJumping) claude.y = claude.groundY;
+});
 </script>
 </body>
 </html>
